@@ -1,0 +1,237 @@
+Hands-on Lab: Generative AI for Querying Databases
+
+We have a Heart Disease prediction dataset with a single table which has the following attributes.
+1. age - age in years
+2. gender- gender (1 = male; 0 = female)
+3. cp - chest pain type
+        -- Value 1: typical angina
+        -- Value 2: atypical angina
+        -- Value 3: non-anginal pain
+        -- Value 4: asymptomatic
+4. trestbps - resting blood pressure (in mm Hg on admission to the hospital)
+5. chol - serum cholestoral in mg/dl
+6. fbs - (fasting blood sugar > 120 mg/dl)  (1 = true; 0 = false)
+7. restecg - resting electrocardiographic results
+        -- Value 0: normal
+        -- Value 1: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV)
+        -- Value 2: showing probable or definite left ventricular hypertrophy by Estes' criteria
+8. thalach - maximum heart rate achieved
+9. exang - exercise induced angina (1 = yes; 0 = no)
+10. oldpeak - ST depression induced by exercise relative to rest
+11. slope - the slope of the peak exercise ST segment
+        -- Value 1: upsloping
+        -- Value 2: flat
+        -- Value 3: downsloping
+12. ca - number of major vessels (0-3) colored by flourosopy
+13. thal - 3 = normal; 6 = fixed defect; 7 = reversable defect
+14. num (the predicted attribute) - diagnosis of heart disease (angiographic disease status)
+        -- Value 0: < 50% diameter narrowing
+        -- Value 1: > 50% diameter narrowing
+
+Prompts for Data Querying
+
+Write an SQL query to find the minimum, maximum, and average age of patients in the dataset.
+
+You can expect to see the following query in response.
+
+SELECT 
+    MIN(age) AS min_age,
+    MAX(age) AS max_age,
+    AVG(age) AS avg_age
+FROM 
+    heart_disease_prediction_dataset;
+
+Gender Analysis
+
+Consider the following prompt.
+
+Write an SQL query to investigate the distribution of the target variable (presence or absence of heart disease) within different age groups (e.g., 20-30, 30-40, etc.).
+
+SELECT 
+    cp,
+    COUNT(*) AS pain_frequency
+FROM 
+    heart_disease_prediction_dataset
+GROUP BY 
+    cp;
+
+Age Group Analysis and Target Variable
+
+Consider the following prompt.
+
+Write an SQL query to investigate the distribution of the target variable (presence or absence of heart disease) within different age groups (e.g., 20-30, 30-40, etc.).
+
+You can expect the following output.
+
+SELECT 
+    CASE
+        WHEN age BETWEEN 20 AND 30 THEN '20-30'
+        WHEN age BETWEEN 31 AND 40 THEN '31-40'
+        WHEN age BETWEEN 41 AND 50 THEN '41-50'
+        WHEN age BETWEEN 51 AND 60 THEN '51-60'
+        WHEN age BETWEEN 61 AND 70 THEN '61-70'
+        ELSE 'Above 70'
+    END AS age_group,
+    SUM(CASE WHEN num = 1 THEN 1 ELSE 0 END) AS heart_disease_count,
+    SUM(CASE WHEN num = 0 THEN 1 ELSE 0 END) AS no_heart_disease_count
+FROM 
+    heart_disease_prediction_dataset
+GROUP BY 
+    age_group
+ORDER BY 
+    age_group;
+
+Practice Prompts
+
+Try to generate queries for the data set for the following prompts:
+
+Cholesterol Range:
+1
+Find the range of cholesterol levels among patients (minimum, maximum).
+
+```sql
+SELECT 
+    MIN(chol) AS min_chol,
+    MAX(chol) AS max_chol
+FROM 
+    your_table_name;
+```
+
+Age Range and Gender Analysis:
+1
+Determine the age range (youngest and oldest) for male and female patients separately.
+
+For Male Patients:
+```sql
+SELECT 
+    'Male' AS gender,
+    MIN(age) AS youngest_age,
+    MAX(age) AS oldest_age
+FROM 
+    your_table_name
+WHERE 
+    gender = 1;
+```
+
+For Female Patients:
+```sql
+SELECT 
+    'Female' AS gender,
+    MIN(age) AS youngest_age,
+    MAX(age) AS oldest_age
+FROM 
+    your_table_name
+WHERE 
+    gender = 0;
+```
+
+Age Group Analysis and Target Variable:
+1
+Investigate the distribution of the target variable (presence or absence of heart disease) within different age groups (e.g., 20-30, 30-40, etc.).
+
+```sql
+SELECT 
+    CASE
+        WHEN age BETWEEN 20 AND 30 THEN '20-30'
+        WHEN age BETWEEN 31 AND 40 THEN '31-40'
+        WHEN age BETWEEN 41 AND 50 THEN '41-50'
+        WHEN age BETWEEN 51 AND 60 THEN '51-60'
+        WHEN age BETWEEN 61 AND 70 THEN '61-70'
+        ELSE 'Above 70'
+    END AS age_group,
+    SUM(CASE WHEN num = 1 THEN 1 ELSE 0 END) AS heart_disease_count,
+    SUM(CASE WHEN num = 0 THEN 1 ELSE 0 END) AS no_heart_disease_count
+FROM 
+    your_table_name
+GROUP BY 
+    age_group
+ORDER BY 
+    age_group;
+```
+
+Maximum Heart Rate by Age Group:
+1
+Find the maximum heart rate achieved during exercise for different age groups (e.g., 30-40, 40-50, etc.).
+
+```sql
+SELECT 
+    CASE
+        WHEN age BETWEEN 20 AND 30 THEN '20-30'
+        WHEN age BETWEEN 31 AND 40 THEN '31-40'
+        WHEN age BETWEEN 41 AND 50 THEN '41-50'
+        WHEN age BETWEEN 51 AND 60 THEN '51-60'
+        WHEN age BETWEEN 61 AND 70 THEN '61-70'
+        ELSE 'Above 70'
+    END AS age_group,
+    MAX(thalach) AS max_heart_rate
+FROM 
+    your_table_name
+GROUP BY 
+    age_group
+ORDER BY 
+    age_group;
+```
+
+Percentage of Patients with High Blood Sugar:
+1
+Calculate the percentage of patients with fasting blood sugar greater than 120 mg/dl.
+
+```sql
+SELECT 
+    (COUNT(CASE WHEN fbs = 1 THEN 1 END) * 100.0 / COUNT(*)) AS percentage_high_fbs
+FROM 
+    your_table_name;
+```
+
+Ratio of Patients with Resting Electrocardiographic Abnormality:
+1
+Find the ratio of patients with abnormal resting electrocardiographic results to those with normal results.
+
+```sql
+SELECT 
+    (COUNT(CASE WHEN restecg <> 0 THEN 1 END) * 1.0 / COUNT(*)) AS ratio_abnormal_to_normal
+FROM 
+    your_table_name;
+```
+
+Number of Patients with Reversible Thalassemia:
+1
+Count the number of patients with reversible thalassemia detected by thallium stress testing.
+
+```sql
+SELECT 
+    COUNT(*) AS reversible_thalassemia_count
+FROM 
+    your_table_name
+WHERE 
+    thal = 7;
+```
+
+Average Age of Patients with Chest Pain:
+1
+Calculate the average age of patients who experienced chest pain during diagnosis.
+
+```sql
+SELECT 
+    AVG(age) AS avg_age
+FROM 
+    your_table_name
+WHERE 
+    cp IN (1, 2, 3, 4);
+```
+
+Distribution of Patients by Number of Major Vessels:
+1
+Investigate the distribution of patients based on the number of major vessels colored by fluoroscopy (0-3).
+
+```sql
+SELECT 
+    ca,
+    COUNT(*) AS patient_count
+FROM 
+    your_table_name
+GROUP BY 
+    ca
+ORDER BY 
+    ca;
+```
